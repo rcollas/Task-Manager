@@ -1,4 +1,4 @@
-from flask import (Blueprint, request, jsonify)
+from flask import (Blueprint, request, jsonify, abort)
 from core.db import get_db
 
 bp = Blueprint('tasks', __name__, url_prefix='/tasks')
@@ -14,7 +14,7 @@ def db_tasks_to_json(tasks):
     return res
 
 
-@bp.route('/', methods=['GET', 'POST'])
+@bp.route('', methods=['GET', 'POST'])
 def all_tasks():
     db = get_db()
     if request.method == 'GET':
@@ -23,18 +23,17 @@ def all_tasks():
         return jsonify(success)
     if request.method == 'POST':
         task = request.get_json()
-        if 'title' in task and 'description' in task:
-            try:
-                db.execute('INSERT INTO task (title, description) VALUES (?, ?)', (task['title'], task['description']))
-                db.commit()
-            except db.IntegrityError:
-                error['message'] = f'Title {task["title"]} is already registered'
-                return jsonify(error)
-            else:
-                return jsonify(success)
+        if 'title' not in task:
+            abort(400, description='No title provided.')
+        if 'description' not in task:
+            abort(400, description='No description provided.')
+        try:
+            db.execute('INSERT INTO task (title, description) VALUES (?, ?)', (task['title'], task['description']))
+            db.commit()
+        except db.IntegrityError:
+            abort(400, message=f'Title {task["title"]} is already registered.')
         else:
-            error['message'] = 'One of title or description is missing'
-            return jsonify(error)
+            return jsonify(success)
 
 
 @bp.route('/<task_id>', methods=['PUT', 'DELETE'])

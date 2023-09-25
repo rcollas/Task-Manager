@@ -1,0 +1,18 @@
+[project]
+name = "core"
+version = "1.0.0"
+description = "A simple task manager made to learn the basics of Flask and Vue.js."
+dependencies = [
+    "flask",
+]
+
+[build-system]
+requires = ["flit_core<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.coverage.run]
+branch = true
+source = ["core"]
