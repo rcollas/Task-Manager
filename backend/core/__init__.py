@@ -1,5 +1,5 @@
 import os
-from flask import Flask
+from flask import (Flask, jsonify)
 from flask_cors import CORS
 
 
@@ -24,6 +24,15 @@ def create_app(test_config=None):
     @app.route('/hello')
     def hello():
         return 'Hello, World!'
+
+    @app.errorhandler(400)
+    def bad_request_error(error):
+        response = jsonify({
+            'error': 'Bad Request',
+            'message': error.description
+        })
+        response.status_code = 400
+        return response
 
     from . import db
     db.init_app(app)
