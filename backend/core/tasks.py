@@ -31,7 +31,7 @@ def all_tasks():
             db.execute('INSERT INTO task (title, description) VALUES (?, ?)', (task['title'], task['description']))
             db.commit()
         except db.IntegrityError:
-            abort(400, message=f'Title {task["title"]} is already registered.')
+            abort(400, description=f'Title {task["title"]} is already registered.')
         else:
             return jsonify(success)
 
