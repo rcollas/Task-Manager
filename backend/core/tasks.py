@@ -42,36 +42,32 @@ def modify_task(task_id):
 
     exists = db.execute('SELECT * FROM task WHERE id = ?', [task_id]).fetchone()
     if len(exists) == 0:
-        error['message'] = f'Id {task_id} is not a valid id.'
-        return error
+        abort(400, description=f'Id {task_id} is not a valid id.')
 
     if request.method == 'PUT':
         task = request.get_json()
-        if 'title' in task and 'description' in task:
-            try:
-                db.execute('UPDATE task SET title = ?, description = ? WHERE id = ?',
-                           (task['title'], task['description'], task_id))
-                db.commit()
-            except db.IntegrityError:
-                error['message'] = f'Title {task["title"]} is already registered'
-                return jsonify(error)
-            else:
-                return jsonify(success)
-        elif 'title' in task:
-            try:
-                db.execute('UPDATE task SET title = ? WHERE id = ?', (task['title'], task_id))
-                db.commit()
-            except db.IntegrityError:
-                error['message'] = f'Title {task["title"]} is already registered'
-                return jsonify(error)
-            else:
-                return jsonify(success)
-        elif 'description' in task:
-            db.execute('UPDATE task SET description = ? WHERE id = ?', (task['description'], task_id))
-            return jsonify(success)
-        else:
-            error['message'] = "No data provided. Provide at least on of title or description."
-            return jsonify(error)
+        query_parts = []
+        params = []
+
+        if 'title' in task:
+            query_parts.append('title = ?')
+            params.append(task['title'])
+        if 'description' in task:
+            query_parts.append('description = ?')
+            params.append(task['description'])
+        if not query_parts:
+            abort(400, description='No data provided. Provide at least on of title or description.')
+
+        query = f'UPDATE task SET {", ".join(query_parts)} WHERE ID = ?'
+        params.append(task_id)
+
+        try:
+            db.execute(query, params)
+            db.commit()
+        except db.IntegrityError:
+            abort(400, description=f'Title {task["title"]} is already registered')
+
+        return jsonify(success)
 
     if request.method == 'DELETE':
         db.execute('DELETE FROM task WHERE id = ?', [task_id])
