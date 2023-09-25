@@ -5,3 +5,10 @@ import { RouterView } from 'vue-router'
 <template>
     <RouterView />
 </template>
+
+<style>
+    :root {
+        background-color: #202124;
+        color: white;
+    }
+</style>
