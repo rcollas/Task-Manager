@@ -41,7 +41,7 @@ def modify_task(task_id):
     db = get_db()
 
     exists = db.execute('SELECT * FROM task WHERE id = ?', [task_id]).fetchone()
-    if len(exists) == 0:
+    if not exists:
         abort(400, description=f'Id {task_id} is not a valid id.')
 
     if request.method == 'PUT':
@@ -56,7 +56,7 @@ def modify_task(task_id):
             query_parts.append('description = ?')
             params.append(task['description'])
         if not query_parts:
-            abort(400, description='No data provided. Provide at least on of title or description.')
+            abort(400, description='No data provided. Provide at least one of title or description.')
 
         query = f'UPDATE task SET {", ".join(query_parts)} WHERE ID = ?'
         params.append(task_id)
