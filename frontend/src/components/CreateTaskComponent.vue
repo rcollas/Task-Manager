@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import axios from 'axios'
 
 interface Task {
     title: string
@@ -7,6 +8,33 @@ interface Task {
 }
 
 const data = ref<Task>({ title: '', description: '' })
+const emit = defineEmits(['addTask']);
+
+async function createTask() {
+    const path = 'http://localhost:5000/tasks'
+    const {title, description} = data.value;
+    if (!title || !description) {
+        window.alert(`You must specify a title and a description.`)
+        return
+    }
+    try {
+        const res = await axios.post(
+            path,
+            { title: title, description: description },
+            {
+                headers: { 'Content-Type': 'application/json' }
+            }
+        )
+        if (res.status === 200) {
+            emit('addTask', title, description);
+            data.value.title = '';
+            data.value.description = '';
+        }
+        console.log(res.data)
+    } catch (err) {
+        console.error(err)
+    }
+}
 </script>
 
 <template>
@@ -33,7 +61,7 @@ const data = ref<Task>({ title: '', description: '' })
             <button
                 type="submit"
                 class="btn"
-                @click.prevent="$emit('createTask', data)"
+                @click.prevent="createTask"
             >
                 Create
             </button>
