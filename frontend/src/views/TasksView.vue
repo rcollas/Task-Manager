@@ -33,24 +33,8 @@ async function removeTask(taskId) {
     }
 }
 
-async function createTask({ title, description }) {
-    const path = 'http://localhost:5000/tasks'
-    if (!title || !description) {
-        window.alert(`You must specify a title and a description.`)
-        return
-    }
-    try {
-        const res = await axios.post(
-            path,
-            { title: title, description: description },
-            {
-                headers: { 'Content-Type': 'application/json' }
-            }
-        )
-        console.log(res.data)
-    } catch (err) {
-        console.error(err)
-    }
+function addTask(title, description) {
+    tasks.value.push({ id: 50, title: title, description: description })
 }
 
 async function updateTask(event) {
@@ -72,7 +56,7 @@ onMounted(() => {
 <template>
     <div class="task_manager_container">
         <h1>Task Manager</h1>
-        <CreateTaskComponent @create-task="createTask" />
+        <CreateTaskComponent @add-task="addTask" />
         <TasksComponent
             v-for="task in tasks"
             :key="task.id"
